@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "CreaCre.sln"
+    "dotnet.defaultSolution": "CreationClash2.5D.sln"
 }
