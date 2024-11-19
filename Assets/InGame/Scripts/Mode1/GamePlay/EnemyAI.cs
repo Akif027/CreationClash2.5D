@@ -12,6 +12,9 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float minSpawnInterval = 2f; // Minimum time interval between spawns
     [SerializeField] private float maxSpawnInterval = 5f; // Maximum time interval between spawns
     [SerializeField] private Vector2 randomLaunchAngleRange = new Vector2(20f, 45f); // Random launch angle range
+    [SerializeField] private float launchDelay = 1f; // Delay before launching the weapon
+
+    public AnimationController EnemyAnimationController;
     private bool canSpawn = true; // Controls whether the AI can spawn weapons
 
     private void Start()
@@ -78,11 +81,19 @@ public class EnemyAI : MonoBehaviour
         // Instantiate the weapon
         GameObject weaponInstance = Instantiate(randomWeaponData.WeaponPrefab, weaponSpawnPoint.position, Quaternion.identity);
         ProjectileWeapon weaponLogic = weaponInstance.GetComponent<ProjectileWeapon>();
+        weaponLogic.animationController = EnemyAnimationController;
         if (weaponLogic == null)
         {
             Debug.LogWarning("ProjectileWeapon script is missing on the spawned weapon prefab!");
             Destroy(weaponInstance);
             return;
+        }
+
+        // Set the Rigidbody to kinematic initially
+        Rigidbody weaponRigidbody = weaponInstance.GetComponent<Rigidbody>();
+        if (weaponRigidbody != null)
+        {
+            weaponRigidbody.isKinematic = true;
         }
 
         // Assign weapon data and set it as an enemy weapon
@@ -93,10 +104,26 @@ public class EnemyAI : MonoBehaviour
         float randomAngle = Random.Range(randomLaunchAngleRange.x, randomLaunchAngleRange.y);
         Vector2 launchDirection = CalculateLaunchDirection(randomAngle);
 
+        // Launch the weapon with a delay
+        StartCoroutine(DelayedLaunch(weaponLogic, weaponRigidbody, launchDirection, randomAngle));
+    }
+
+    /// <summary>
+    /// Coroutine to delay the launch of the weapon.
+    /// </summary>
+    private IEnumerator DelayedLaunch(ProjectileWeapon weaponLogic, Rigidbody weaponRigidbody, Vector2 launchDirection, float angle)
+    {
+        yield return new WaitForSeconds(launchDelay);
+
+        // Set the Rigidbody to dynamic just before launch
+        if (weaponRigidbody != null)
+        {
+            weaponRigidbody.isKinematic = false;
+        }
+        EnemyAnimationController.PlayAnimation(AnimationType.Throw);
         // Launch the weapon
         weaponLogic.Launch(launchDirection);
-
-        Debug.Log($"EnemyAI spawned and launched {randomWeaponData.WeaponPrefabName} at angle {randomAngle}°.");
+        Debug.Log($"EnemyAI launched {weaponLogic.name} at angle {angle}° after a delay of {launchDelay}s.");
     }
 
     /// <summary>

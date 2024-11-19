@@ -6,29 +6,35 @@ public class ProjectileWeapon : MonoBehaviour
 {
     [Header("Weapon Settings")]
     private WeaponData weaponData;
-    private Rigidbody2D weaponRigidbody; // Rigidbody of the weapon in the scene
-    private Transform firePoint; // Point from where the weapon is launched
+    private Rigidbody weaponRigidbody; // Rigidbody for 3D physics
+    private Transform firePoint; // Launch point for the weapon
 
     [Header("Trajectory Settings")]
-    [SerializeField] private string trajectoryDotPoolName = "DotMaker"; // The name of the dot pool in the ObjectPool
-    public int dotCount = 30; // Number of dots in the trajectory
-    private List<GameObject> activeDots = new List<GameObject>(); // List to track active trajectory dots
-    private ObjectPool objectPool; // Reference to the ObjectPool script
+    [SerializeField] private string trajectoryDotPoolName = "DotMaker"; // Name of the trajectory dot pool
+    public int dotCount = 30; // Number of trajectory dots
+    private List<GameObject> activeDots = new List<GameObject>();
+    private ObjectPool objectPool; // Reference to the ObjectPool
 
     [Header("State")]
     public bool isLaunched = false;
     public bool isEnemyWeapon = false;
 
     [Header("Collider")]
-    [SerializeField] private Collider2D col;
+    [SerializeField] private Collider col;
 
-    public float dynamicLaunchAngle; // Temporary runtime value for the launch angle
+    public float dynamicLaunchAngle; // Angle at which the weapon will launch
+
+    public AnimationController animationController;
 
     private void Start()
     {
+
+        animationController.PlayAnimation(AnimationType.Catch);
+
+
         col.enabled = false;
 
-        // Assign the fire point specific to this weapon
+        // Assign the fire point
         firePoint = transform.Find("firePoint");
         if (firePoint == null)
         {
@@ -36,27 +42,27 @@ public class ProjectileWeapon : MonoBehaviour
             return;
         }
 
-        // Find the ObjectPool in the scene
+        // Find ObjectPool
         objectPool = FindFirstObjectByType<ObjectPool>();
-        weaponRigidbody = GetComponent<Rigidbody2D>();
+        weaponRigidbody = GetComponent<Rigidbody>();
         if (objectPool == null)
         {
             Debug.LogError("ObjectPool not found in the scene!");
         }
 
-        // Set weapon to kinematic at start for better control
+        // Set Rigidbody to kinematic at the start for controlled launching
         if (weaponRigidbody != null && !isEnemyWeapon)
         {
-            weaponRigidbody.bodyType = RigidbodyType2D.Kinematic;
+            weaponRigidbody.isKinematic = true;
         }
 
-        // Initialize the temporary launch angle from WeaponData
+        // Initialize the launch angle
         dynamicLaunchAngle = weaponData != null ? weaponData.LaunchAngle : 45f;
 
-        // Rotate the weapon appropriately
+        // Rotate weapon based on ownership (player/enemy)
         transform.rotation = isEnemyWeapon ? Quaternion.Euler(0, 180, 16) : Quaternion.Euler(0, 0, 16);
 
-        // Show trajectory at the start (for player only)
+        // Show trajectory for player weapons
         if (!isEnemyWeapon)
             ShowTrajectory();
     }
@@ -64,8 +70,6 @@ public class ProjectileWeapon : MonoBehaviour
     public void AssignWeaponData(WeaponData data)
     {
         weaponData = data;
-
-        // Initialize the dynamic launch angle
         dynamicLaunchAngle = weaponData.LaunchAngle;
     }
 
@@ -92,30 +96,31 @@ public class ProjectileWeapon : MonoBehaviour
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 direction = mouseWorldPosition - firePoint.position;
 
-        // Calculate angle in degrees
+        // Calculate launch angle
         dynamicLaunchAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        // Clamp the angle to a valid range
+        // Clamp the angle
         dynamicLaunchAngle = Mathf.Clamp(dynamicLaunchAngle, 0f, 90f);
 
         if (!isLaunched)
         {
+            animationController.PlayAnimation(AnimationType.Throw);
             Launch();
         }
     }
 
-    public void Launch(Vector2? customDirection = null)
+    public void Launch(Vector3? customDirection = null)
     {
-        if (weaponRigidbody == null)
-            weaponRigidbody = GetComponent<Rigidbody2D>();
+        if (!weaponRigidbody)
+            weaponRigidbody = GetComponent<Rigidbody>();
 
-        if (weaponData == null)
+        if (!weaponData)
         {
             Debug.LogError("WeaponData is not assigned.");
             return;
         }
 
-        Vector2 launchDirection = customDirection ?? CalculateLaunchDirection();
+        Vector3 launchDirection = customDirection ?? CalculateLaunchDirection();
 
         switch (weaponData.WeaponType)
         {
@@ -129,43 +134,44 @@ public class ProjectileWeapon : MonoBehaviour
                 LaunchShuriken(launchDirection);
                 break;
             default:
-                Debug.LogError("Weapon type not supported.");
+                Debug.LogError("Unsupported Weapon Type.");
                 break;
         }
 
         isLaunched = true;
 
-        // Start coroutines for collider enabling and trajectory hiding
+        // Enable collider and disable trajectory
         StartCoroutine(EnableColliderAfterDelay(0.1f));
         StartCoroutine(DisableTrajectoryAfterDelay(1f));
     }
 
-    private Vector2 CalculateLaunchDirection()
+    private Vector3 CalculateLaunchDirection()
     {
-        // Convert the dynamic launch angle into a 2D vector
+        // Convert the launch angle into a 3D vector
         float angleRad = dynamicLaunchAngle * Mathf.Deg2Rad;
-        return new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad)) * (isEnemyWeapon ? -1 : 1); // Reverse X direction for enemy
+        Vector3 direction = new Vector3(Mathf.Cos(angleRad), Mathf.Sin(angleRad), 0);
+        return isEnemyWeapon ? -direction : direction;
     }
 
-    private void LaunchSpear(Vector2 launchDirection)
+    private void LaunchSpear(Vector3 launchDirection)
     {
-        weaponRigidbody.bodyType = RigidbodyType2D.Dynamic;
-        weaponRigidbody.linearVelocity = Vector2.zero; // Reset existing velocity
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode2D.Impulse);
+        weaponRigidbody.isKinematic = false;
+        weaponRigidbody.linearVelocity = Vector3.zero; // Reset velocity
+        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
     }
 
-    private void LaunchRock(Vector2 launchDirection)
+    private void LaunchRock(Vector3 launchDirection)
     {
-        weaponRigidbody.bodyType = RigidbodyType2D.Dynamic;
-        weaponRigidbody.linearVelocity = Vector2.zero;
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode2D.Impulse);
+        weaponRigidbody.isKinematic = false;
+        weaponRigidbody.linearVelocity = Vector3.zero;
+        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
     }
 
-    private void LaunchShuriken(Vector2 launchDirection)
+    private void LaunchShuriken(Vector3 launchDirection)
     {
-        weaponRigidbody.bodyType = RigidbodyType2D.Dynamic;
-        weaponRigidbody.linearVelocity = Vector2.zero;
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode2D.Impulse);
+        weaponRigidbody.isKinematic = false;
+        weaponRigidbody.linearVelocity = Vector3.zero;
+        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
     }
 
     private void AlignWeaponWithVelocity()
@@ -194,12 +200,13 @@ public class ProjectileWeapon : MonoBehaviour
         if (firePoint == null || objectPool == null || weaponData == null) return;
 
         Vector3 startPosition = firePoint.position;
-        Vector2 velocity = new Vector2(
+        Vector3 velocity = new Vector3(
             weaponData.LaunchForce * Mathf.Cos(dynamicLaunchAngle * Mathf.Deg2Rad),
-            weaponData.LaunchForce * Mathf.Sin(dynamicLaunchAngle * Mathf.Deg2Rad)
+            weaponData.LaunchForce * Mathf.Sin(dynamicLaunchAngle * Mathf.Deg2Rad),
+            0
         );
 
-        float gravity = Mathf.Abs(Physics2D.gravity.y);
+        float gravity = Mathf.Abs(Physics.gravity.y);
         float timeStep = weaponData.Range / dotCount;
 
         ClearActiveDots();
@@ -208,8 +215,9 @@ public class ProjectileWeapon : MonoBehaviour
         {
             float t = i * timeStep / weaponData.LaunchForce;
             Vector3 position = startPosition + new Vector3(
-                (isEnemyWeapon ? -1 : 1) * velocity.x * t,
-                velocity.y * t - 0.5f * gravity * t * t
+                velocity.x * t,
+                velocity.y * t - 0.5f * gravity * t * t,
+                0
             );
 
             GameObject dot = objectPool.GetPooledObject(trajectoryDotPoolName);
@@ -241,11 +249,12 @@ public class ProjectileWeapon : MonoBehaviour
         activeDots.Clear();
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter(Collision collision)
     {
         BodyPart bodyPart = collision.collider.GetComponent<BodyPart>();
         if (bodyPart != null)
         {
+
             bodyPart.TakeDamage(weaponData.Damage);
             Destroy(gameObject);
         }

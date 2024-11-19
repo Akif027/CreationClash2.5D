@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Shuriken
   m_EditorClassIdentifier: 
   weaponPrefabName: Shuriken
-  weaponPrefab: {fileID: 5632324373992620449, guid: 6fce65d21d6cbe14ebf109b511587c8d, type: 3}
-  damage: 10
+  weaponPrefab: {fileID: 7531886262070298994, guid: 5fce44dda0493f042bdc261b592779df, type: 3}
+  damage: 21
   range: 15
   attackSpeed: 0
   launchForce: 15

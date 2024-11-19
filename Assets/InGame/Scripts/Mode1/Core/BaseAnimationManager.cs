@@ -16,7 +16,7 @@ public static class BaseAnimationManager
             { AnimationType.Idle, "Idle" },
             { AnimationType.Catch, "Catch" },
             { AnimationType.Throw, "Throw" },
-
+   { AnimationType.Dead, "Dead" },
         };
     }
 
@@ -75,5 +75,6 @@ public enum AnimationType
 {
     Idle,
     Catch,
-    Throw
+    Throw,
+    Dead
 }

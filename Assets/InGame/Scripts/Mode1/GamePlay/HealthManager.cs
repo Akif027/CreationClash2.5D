@@ -4,9 +4,10 @@ public class HealthManager : MonoBehaviour
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] public float currentHealth;
-
+    public AnimationController animationController;
     private void Start()
     {
+        Time.timeScale = 1; // just temp for prototype
         // Initialize health
         currentHealth = maxHealth;
 
@@ -34,7 +35,9 @@ public class HealthManager : MonoBehaviour
     {
         Debug.Log("Player is dead!");
         UIManager.Instance.ToggleGameOverPanel(true);
-        Destroy(gameObject);
+        animationController.PlayAnimation(AnimationType.Dead);
+        Destroy(gameObject, 2);
+        Time.timeScale = 0;
         // Handle player death logic here
     }
 

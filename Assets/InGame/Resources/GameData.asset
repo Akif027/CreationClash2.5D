@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a20b2d93fef3c9a46bd2ea16b51b61c7, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
-  TextPrefab: {fileID: 1634118262476188036, guid: b7bb3f2aac64af4438de781724080c1f, type: 3}
-  FloatingTextPrefab: {fileID: 8733855163401278387, guid: 64f573c3d30aa53488bef37fd1b92693, type: 3}
+  TextPrefab: {fileID: 1634118262476188036, guid: 82e71e6e475e47a4c9e2d0eb842ab4fd, type: 3}
+  FloatingTextPrefab: {fileID: 8733855163401278387, guid: afaa3e55219a5d04eac89ce945349fbd, type: 3}
   shapeData:
     ShapeDatas:
     - {fileID: 11400000, guid: 208b4198b79f8d14ba306c6be4e9e21f, type: 2}

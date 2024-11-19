@@ -6,46 +6,33 @@ using UnityEngine.UI;
 
 public class DrawShape : MonoBehaviour
 {
-    // [SerializeField] private Text resultText; // UI text to display the result
     [SerializeField] private ShapeRecognizer recognizer; // Reference to the ShapeRecognizer
     [SerializeField] private LineRenderer drawingLineRenderer; // Used for drawing the shape
     [SerializeField] private int minPointsToMatch = 10; // Minimum points to consider a valid drawing
     [SerializeField] private Button EnterDrawB;
     [SerializeField] private Button ChangeDrawB;
     public Transform SpawnPoint;
-    [SerializeField] private GameObject drawingBoundsObject; // GameObject to constrain drawing
     private List<Vector2> drawnPoints = new List<Vector2>(); // List to store drawn points
-    private RealtimeShapeGenerator shapeGenerator; // Shape generator for rendering
     private bool isFreeDrawingMode = true; // Toggle for drawing modes
     public bool InDrawingState = false;
 
-    private Bounds drawingBounds; // Bounds of the drawing area
-
-    private GameView gameview;
-    private GameData gamedata;
-    private void Awake()
-    {
-        shapeGenerator = GetComponent<RealtimeShapeGenerator>();
-
-    }
-
+    private Rect drawingBounds; // Rectangle bounds for drawing
+    public AnimationController PlayerAnimationController;
     private void Start()
     {
-        gameview = (GameView)GameManager.Instance.GetManager<GameView>();
-        gamedata = gameview.GetGameData();
-        // Initialize bounds based on the drawing bounds object
-        if (drawingBoundsObject != null)
-        {
-            Collider2D boundsCollider = drawingBoundsObject.GetComponent<Collider2D>();
-            if (boundsCollider != null)
-            {
-                drawingBounds = boundsCollider.bounds;
-            }
-            else
-            {
-                Debug.LogError("No Collider2D found on the Drawing Bounds Object.");
-            }
-        }
+        // Define the rectangular bounds in world space
+        Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.25f, Screen.height * 0.25f, 0));
+        Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.75f, Screen.height * 0.75f, 0));
+
+        // Create the drawing rectangle based on these points
+        drawingBounds = new Rect(
+            bottomLeft.x,
+            bottomLeft.y,
+            topRight.x - bottomLeft.x,
+            topRight.y - bottomLeft.y
+        );
+
+        Debug.Log($"Drawing Bounds: {drawingBounds}");
 
         EnterDrawB.onClick.AddListener(AnalyzeDraw);
         ChangeDrawB.onClick.AddListener(ChangeMode);
@@ -79,7 +66,6 @@ public class DrawShape : MonoBehaviour
     private void ChangeMode()
     {
         isFreeDrawingMode = !isFreeDrawingMode;
-        GameManager.Instance.ShowPopUpText(isFreeDrawingMode ? "Free Drawing Mode" : "Point-to-Point Mode");
         Debug.Log(isFreeDrawingMode ? "Free Drawing Mode" : "Point-to-Point Mode");
         ClearDrawing();
     }
@@ -88,12 +74,12 @@ public class DrawShape : MonoBehaviour
     {
         if (drawnPoints.Count >= minPointsToMatch)
         {
+            Debug.Log("Processing drawing...");
             ProcessDrawing();
         }
         else
         {
-            GameManager.Instance.ShowPopUpText("Drawing too short to match a shape.");
-            // resultText.text = "Drawing too short to match a shape.";
+            Debug.LogWarning("Drawing too short to match a shape.");
         }
     }
 
@@ -101,7 +87,7 @@ public class DrawShape : MonoBehaviour
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        // Check if the mouse position is within the bounds
+        // Check if the mouse position is within the rectangular bounds
         if (drawingBounds.Contains(mousePos))
         {
             // Add point only if far enough from the last point
@@ -111,6 +97,10 @@ public class DrawShape : MonoBehaviour
                 drawingLineRenderer.positionCount = drawnPoints.Count;
                 drawingLineRenderer.SetPosition(drawnPoints.Count - 1, mousePos);
             }
+        }
+        else
+        {
+            Debug.LogWarning($"Point {mousePos} is outside of bounds {drawingBounds}");
         }
     }
 
@@ -134,18 +124,14 @@ public class DrawShape : MonoBehaviour
             // Instantiate the weapon prefab
             if (matchedWeapon.WeaponPrefab != null)
             {
-                // AnimationController.Instance.PlayAnimation(AnimationType.Catch);
-
                 GameObject weaponInstance = Instantiate(matchedWeapon.WeaponPrefab, SpawnPoint.position, Quaternion.identity, SpawnPoint);
                 ProjectileWeapon weapon = weaponInstance.GetComponent<ProjectileWeapon>();
+                weapon.animationController = PlayerAnimationController;
                 weapon.AssignWeaponData(matchedWeapon);
 
                 Debug.Log($"Instantiated Weapon: {matchedWeapon.WeaponPrefabName}");
                 GameManager.Instance.ShowPopUpText($"{matchedWeapon.WeaponPrefabName}");
-                // Disable drawing state
-                InDrawingState = false;
-                weaponInstance.transform.SetParent(SpawnPoint);
-                // Enable drawing state after a delay (e.g., 2 seconds)
+                InDrawingState = false; // Disable drawing state
                 StartCoroutine(EnableDrawingStateAfterDelay(1f));
             }
             else

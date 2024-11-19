@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Spear
   m_EditorClassIdentifier: 
   weaponPrefabName: Spear
-  weaponPrefab: {fileID: 5698393532905840184, guid: 61a5a28f8f33f524886a83fccb34a3ff, type: 3}
-  damage: 10
+  weaponPrefab: {fileID: 8116991361924817727, guid: bfe1b0fb37c32d74c93d5fbacbea873e, type: 3}
+  damage: 20
   range: 15
   attackSpeed: 0
   launchForce: 20
