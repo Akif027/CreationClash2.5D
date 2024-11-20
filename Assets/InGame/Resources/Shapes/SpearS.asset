@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af21c66a0ddca254a9d62d79341aa48c, type: 3}
+  m_Name: SpearS
+  m_EditorClassIdentifier: 
+  shapeName: SpearS
+  shapeType: 0
+  weaponType: 1
+  points:
+  - {x: -3.2902536, y: 9.670373}
+  - {x: 3.8020916, y: 9.64625}
+  - {x: 1.7033362, y: 11.359027}
+  - {x: 1.6550889, y: 8.0540905}
+  - {x: 3.8020916, y: 9.670373}

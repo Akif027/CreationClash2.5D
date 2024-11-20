@@ -45,7 +45,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 10307, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -165,7 +165,7 @@ Material:
     - _OutlinePixelSizeType: 0
     - _OutlineTextureLOD: 5
     - _OutlineTextureType: 0
-    - _OutlineWidth: 1.43
+    - _OutlineWidth: 3.43
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _RampBands: 4
@@ -174,8 +174,8 @@ Material:
     - _RampScale: 1
     - _RampSmooth: 0.1
     - _RampSmoothAdd: 0.75
-    - _RampSmoothing: 0.1
-    - _RampThreshold: 0.5
+    - _RampSmoothing: 0.481
+    - _RampThreshold: 0.68
     - _RampType: 0
     - _ReceiveShadows: 1
     - _ReceiveShadowsOff: 0
@@ -225,12 +225,12 @@ Material:
     - _ZSmooth: -0.5
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.9339623, g: 0.53038967, b: 0.030838395, a: 1}
+    - _BaseColor: {r: 0.04801533, g: 0.6564007, b: 0.7830189, a: 1}
     - _Color: {r: 1, g: 0.5446333, b: 0.24056599, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HColor: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
     - _MatCapColor: {r: 1, g: 1, b: 1, a: 1}
-    - _OutlineColor: {r: 0.3584906, g: 0.07924684, b: 0.018600928, a: 1}
+    - _OutlineColor: {r: 1, g: 0, b: 0, a: 1}
     - _ReflectionColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 0.8, g: 0.8, b: 0.8, a: 0.5}
     - _SColor: {r: 0.9245283, g: 0.37170172, b: 0.082858644, a: 1}

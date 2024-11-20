@@ -21,9 +21,10 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 91598db121bab9741957a97b459f3878, type: 2}
     - {fileID: 11400000, guid: dcec265e114343843b21cf2572a5752b, type: 2}
     - {fileID: 11400000, guid: f853ff0e343a00941b91f88e3e91e32f, type: 2}
+    - {fileID: 11400000, guid: d9ef51923137cb64c9e28fd3dee695b4, type: 2}
     - {fileID: 11400000, guid: 96d5c83fcdcdee34580ca7cce22988e1, type: 2}
-    - {fileID: 11400000, guid: 5af5ed35a3d31574893ec7ea79f2e75a, type: 2}
   weaponDatas:
   - {fileID: 11400000, guid: b1e747bd3a801f244a6f74a739077338, type: 2}
   - {fileID: 11400000, guid: 00ac591f688b16c49ad46e43cda13e56, type: 2}
   - {fileID: 11400000, guid: 916ee2748b306cd4f8d9f3be3ed959db, type: 2}
+  - {fileID: 11400000, guid: e4f4b193d044e89469b23180a5d3fcd5, type: 2}

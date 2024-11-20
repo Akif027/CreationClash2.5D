@@ -14,6 +14,7 @@ public enum WeaponType
     Rock,
     Spear,
     Shuriken,
+    Stick,
     None
 
 

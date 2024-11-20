@@ -133,6 +133,9 @@ public class ProjectileWeapon : MonoBehaviour
             case WeaponType.Shuriken:
                 LaunchShuriken(launchDirection);
                 break;
+            case WeaponType.Stick:
+                LaunchSpear(launchDirection);
+                break;
             default:
                 Debug.LogError("Unsupported Weapon Type.");
                 break;
