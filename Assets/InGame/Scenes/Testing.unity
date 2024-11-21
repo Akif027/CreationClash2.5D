@@ -1169,11 +1169,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400044, guid: fa7f36c71b9e8fa4798df3a931c2fd92, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.43
+      value: 5.08
       objectReference: {fileID: 0}
     - target: {fileID: 400044, guid: fa7f36c71b9e8fa4798df3a931c2fd92, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.06
+      value: -0.07
       objectReference: {fileID: 0}
     - target: {fileID: 400044, guid: fa7f36c71b9e8fa4798df3a931c2fd92, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1478,7 +1478,7 @@ MonoBehaviour:
   shapeTemplates: []
   fourierThreshold: 0.5
   dtwThreshold: 10
-  minConfidenceThreshold: 3
+  minConfidenceThreshold: 6
 --- !u!95 &1185595513 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 248291423861221990, guid: 93459617e0bc1d34ea207d95fe37dd7b, type: 3}
