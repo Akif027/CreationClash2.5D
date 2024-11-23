@@ -81,7 +81,7 @@ public class EnemyAI : MonoBehaviour
         // Instantiate the weapon
         GameObject weaponInstance = Instantiate(randomWeaponData.WeaponPrefab, weaponSpawnPoint.position, Quaternion.identity);
         ProjectileWeapon weaponLogic = weaponInstance.GetComponent<ProjectileWeapon>();
-        weaponLogic.animationController = EnemyAnimationController;
+        //weaponLogic.animationController = EnemyAnimationController;
         if (weaponLogic == null)
         {
             Debug.LogWarning("ProjectileWeapon script is missing on the spawned weapon prefab!");
@@ -98,7 +98,7 @@ public class EnemyAI : MonoBehaviour
 
         // Assign weapon data and set it as an enemy weapon
         weaponLogic.AssignWeaponData(randomWeaponData);
-        weaponLogic.isEnemyWeapon = true;
+        //    weaponLogic.isEnemyWeapon = true;
 
         // Randomize launch angle and launch direction
         float randomAngle = Random.Range(randomLaunchAngleRange.x, randomLaunchAngleRange.y);

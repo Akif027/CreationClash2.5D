@@ -5,214 +5,125 @@ using UnityEngine;
 public class ProjectileWeapon : MonoBehaviour
 {
     [Header("Weapon Settings")]
-    private WeaponData weaponData;
-    private Rigidbody weaponRigidbody; // Rigidbody for 3D physics
-    private Transform firePoint; // Launch point for the weapon
+    private WeaponData weaponData; // Reference to the WeaponData
+    private Rigidbody weaponRigidbody; // Rigidbody for physics
+    private Vector3 initialPosition; // Initial position of the weapon (spawn point)
+    private Camera mainCamera;
+
+    [Header("Drag & Release Settings")]
+    [SerializeField] private float maxDragDistance = 5f; // Maximum drag distance
+    private Vector3 dragStartPosition; // Start position of the drag
+    private Vector3 dragEndPosition; // End position of the drag
+    private bool isDragging = false;
+
+    [Header("State")]
+    public bool isLaunched = false; // Whether the weapon is launched
 
     [Header("Trajectory Settings")]
     [SerializeField] private string trajectoryDotPoolName = "DotMaker"; // Name of the trajectory dot pool
     public int dotCount = 30; // Number of trajectory dots
-    private List<GameObject> activeDots = new List<GameObject>();
-    private ObjectPool objectPool; // Reference to the ObjectPool
-
-    [Header("State")]
-    public bool isLaunched = false;
-    public bool isEnemyWeapon = false;
-
-    [Header("Collider")]
-    [SerializeField] private Collider col;
-
-    public float dynamicLaunchAngle; // Angle at which the weapon will launch
-
-    public AnimationController animationController;
+    private List<GameObject> activeDots = new List<GameObject>(); // Active dots for trajectory visualization
+    private ObjectPool objectPool; // Object pool reference
 
     private void Start()
     {
-
-        animationController.PlayAnimation(AnimationType.Catch);
-
-
-        col.enabled = false;
-
-        // Assign the fire point
-        firePoint = transform.Find("firePoint");
-        if (firePoint == null)
-        {
-            Debug.LogError("FirePoint not found as a child of the weapon!");
-            return;
-        }
-
-        // Find ObjectPool
-        objectPool = FindFirstObjectByType<ObjectPool>();
+        mainCamera = Camera.main;
         weaponRigidbody = GetComponent<Rigidbody>();
-        if (objectPool == null)
+        initialPosition = transform.position; // Save the initial position
+        objectPool = FindFirstObjectByType<ObjectPool>();
+
+        if (weaponRigidbody != null)
         {
-            Debug.LogError("ObjectPool not found in the scene!");
+            weaponRigidbody.isKinematic = true; // Ensure it's kinematic before launch
         }
 
-        // Set Rigidbody to kinematic at the start for controlled launching
-        if (weaponRigidbody != null && !isEnemyWeapon)
-        {
-            weaponRigidbody.isKinematic = true;
-        }
-
-        // Initialize the launch angle
-        dynamicLaunchAngle = weaponData != null ? weaponData.LaunchAngle : 45f;
-
-        // Rotate weapon based on ownership (player/enemy)
-        transform.rotation = isEnemyWeapon ? Quaternion.Euler(0, 180, 16) : Quaternion.Euler(0, 0, 16);
-
-        // Show trajectory for player weapons
-        if (!isEnemyWeapon)
-            ShowTrajectory();
-    }
-
-    public void AssignWeaponData(WeaponData data)
-    {
-        weaponData = data;
-        dynamicLaunchAngle = weaponData.LaunchAngle;
+        // Trigger event to notify that a weapon is spawned
+        EventManager.TriggerEvent("OnWeaponSpawned");
     }
 
     private void Update()
     {
-        // For player: Update launch angle and trajectory before launching
-        if (!isLaunched && !isEnemyWeapon && Input.GetMouseButton(0)) // Left mouse button
+        if (isLaunched) return; // Skip update if the weapon is launched
+
+        HandleDragAndRelease(); // Handle drag and release mechanics
+    }
+
+    private void HandleDragAndRelease()
+    {
+        if (Input.GetMouseButtonDown(0)) // Start drag
         {
-            UpdateLaunchAngle();
-            ShowTrajectory();
+            dragStartPosition = GetMouseWorldPosition();
+            isDragging = true;
         }
 
-        // Align weapon rotation with velocity after launch
-        if (isLaunched && weaponData.WeaponType == WeaponType.Spear)
+        if (Input.GetMouseButton(0) && isDragging) // During drag
         {
-            AlignWeaponWithVelocity();
+            Vector3 currentMousePosition = GetMouseWorldPosition();
+            Vector3 dragVector = dragStartPosition - currentMousePosition;
+
+            // Clamp drag vector to maximum drag distance
+            if (dragVector.magnitude > maxDragDistance)
+            {
+                dragVector = dragVector.normalized * maxDragDistance;
+            }
+
+            // Show trajectory based on drag vector
+            ShowTrajectory(dragVector);
+        }
+
+        if (Input.GetMouseButtonUp(0) && isDragging) // Release drag
+        {
+            dragEndPosition = GetMouseWorldPosition();
+            Vector3 releaseVector = dragStartPosition - dragEndPosition;
+
+            // Clamp the release vector to the maximum drag distance
+            if (releaseVector.magnitude > maxDragDistance)
+            {
+                releaseVector = releaseVector.normalized * maxDragDistance;
+            }
+
+            Launch(releaseVector); // Launch the weapon
+            isDragging = false;
         }
     }
 
-    private void UpdateLaunchAngle()
+    private Vector3 GetMouseWorldPosition()
     {
-        if (firePoint == null) return;
-
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 direction = mouseWorldPosition - firePoint.position;
-
-        // Calculate launch angle
-        dynamicLaunchAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        // Clamp the angle
-        dynamicLaunchAngle = Mathf.Clamp(dynamicLaunchAngle, 0f, 90f);
-
-        if (!isLaunched)
-        {
-            animationController.PlayAnimation(AnimationType.Throw);
-            Launch();
-        }
+        Vector3 mouseScreenPosition = Input.mousePosition;
+        mouseScreenPosition.z = Mathf.Abs(mainCamera.transform.position.z); // Adjust depth
+        return mainCamera.ScreenToWorldPoint(mouseScreenPosition);
     }
 
-    public void Launch(Vector3? customDirection = null)
+    public void Launch(Vector3 releaseVector)
     {
-        if (!weaponRigidbody)
-            weaponRigidbody = GetComponent<Rigidbody>();
+        if (isLaunched) return; // Prevent multiple launches
 
-        if (!weaponData)
-        {
-            Debug.LogError("WeaponData is not assigned.");
-            return;
-        }
-
-        Vector3 launchDirection = customDirection ?? CalculateLaunchDirection();
-
-        switch (weaponData.WeaponType)
-        {
-            case WeaponType.Spear:
-                LaunchSpear(launchDirection);
-                break;
-            case WeaponType.Rock:
-                LaunchRock(launchDirection);
-                break;
-            case WeaponType.Shuriken:
-                LaunchShuriken(launchDirection);
-                break;
-            case WeaponType.Stick:
-                LaunchSpear(launchDirection);
-                break;
-            default:
-                Debug.LogError("Unsupported Weapon Type.");
-                break;
-        }
-
+        weaponRigidbody.isKinematic = false; // Enable physics
+        weaponRigidbody.AddForce(releaseVector * weaponData.LaunchForce, ForceMode.Impulse);
         isLaunched = true;
 
-        // Enable collider and disable trajectory
-        StartCoroutine(EnableColliderAfterDelay(0.1f));
+        // Trigger event to notify weapon is released
+        EventManager.TriggerEvent("OnWeaponReleased");
+
+        // Hide trajectory and finalize launch
         StartCoroutine(DisableTrajectoryAfterDelay(1f));
     }
 
-    private Vector3 CalculateLaunchDirection()
+    private void ShowTrajectory(Vector3 dragVector)
     {
-        // Convert the launch angle into a 3D vector
-        float angleRad = dynamicLaunchAngle * Mathf.Deg2Rad;
-        Vector3 direction = new Vector3(Mathf.Cos(angleRad), Mathf.Sin(angleRad), 0);
-        return isEnemyWeapon ? -direction : direction;
-    }
-
-    private void LaunchSpear(Vector3 launchDirection)
-    {
-        weaponRigidbody.isKinematic = false;
-        weaponRigidbody.linearVelocity = Vector3.zero; // Reset velocity
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
-    }
-
-    private void LaunchRock(Vector3 launchDirection)
-    {
-        weaponRigidbody.isKinematic = false;
-        weaponRigidbody.linearVelocity = Vector3.zero;
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
-    }
-
-    private void LaunchShuriken(Vector3 launchDirection)
-    {
-        weaponRigidbody.isKinematic = false;
-        weaponRigidbody.linearVelocity = Vector3.zero;
-        weaponRigidbody.AddForce(launchDirection * weaponData.LaunchForce, ForceMode.Impulse);
-    }
-
-    private void AlignWeaponWithVelocity()
-    {
-        if (weaponRigidbody.linearVelocity.magnitude > 0.1f)
+        if (objectPool == null || weaponData == null || string.IsNullOrEmpty(trajectoryDotPoolName))
         {
-            float angle = Mathf.Atan2(weaponRigidbody.linearVelocity.y, weaponRigidbody.linearVelocity.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(0, 0, angle);
+            Debug.LogError("Required components are missing for trajectory display.");
+            return;
         }
-    }
 
-    private IEnumerator EnableColliderAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        col.enabled = true;
-    }
+        ClearActiveDots();
 
-    private IEnumerator DisableTrajectoryAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        HideTrajectory();
-    }
-
-    private void ShowTrajectory()
-    {
-        if (firePoint == null || objectPool == null || weaponData == null) return;
-
-        Vector3 startPosition = firePoint.position;
-        Vector3 velocity = new Vector3(
-            weaponData.LaunchForce * Mathf.Cos(dynamicLaunchAngle * Mathf.Deg2Rad),
-            weaponData.LaunchForce * Mathf.Sin(dynamicLaunchAngle * Mathf.Deg2Rad),
-            0
-        );
+        Vector3 startPosition = initialPosition;
+        Vector3 velocity = dragVector * weaponData.LaunchForce;
 
         float gravity = Mathf.Abs(Physics.gravity.y);
         float timeStep = weaponData.Range / dotCount;
-
-        ClearActiveDots();
 
         for (int i = 0; i < dotCount; i++)
         {
@@ -224,11 +135,10 @@ public class ProjectileWeapon : MonoBehaviour
             );
 
             GameObject dot = objectPool.GetPooledObject(trajectoryDotPoolName);
-            if (dot != null)
-            {
-                dot.transform.position = position;
-                activeDots.Add(dot);
-            }
+            if (dot == null) break; // Stop if no dots are available in the pool
+
+            dot.transform.position = position;
+            activeDots.Add(dot);
         }
     }
 
@@ -242,6 +152,12 @@ public class ProjectileWeapon : MonoBehaviour
         activeDots.Clear();
     }
 
+    private IEnumerator DisableTrajectoryAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        HideTrajectory();
+    }
+
     private void ClearActiveDots()
     {
         foreach (var dot in activeDots)
@@ -252,20 +168,23 @@ public class ProjectileWeapon : MonoBehaviour
         activeDots.Clear();
     }
 
+    /// <summary>
+    /// Assigns the provided WeaponData to this weapon.
+    /// </summary>
+    /// <param name="data">The WeaponData to assign.</param>
+    public void AssignWeaponData(WeaponData data)
+    {
+        if (data == null)
+        {
+            Debug.LogError("WeaponData is null and cannot be assigned!");
+            return;
+        }
+
+        weaponData = data; // Reference only, no modifications
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        BodyPart bodyPart = collision.collider.GetComponent<BodyPart>();
-        if (bodyPart != null)
-        {
-
-            bodyPart.TakeDamage(weaponData.Damage);
-            Destroy(gameObject);
-        }
-        else
-        {
-            Debug.Log("Hit something other than a body part.");
-        }
-
-        HideTrajectory();
+        HideTrajectory(); // Hide trajectory upon collision
     }
 }

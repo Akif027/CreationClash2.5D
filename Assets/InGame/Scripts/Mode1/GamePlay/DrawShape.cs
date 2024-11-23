@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using ShapeRecognitionPlugin;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,22 +10,19 @@ public class DrawShape : MonoBehaviour
     [SerializeField] private int minPointsToMatch = 10; // Minimum points to consider a valid drawing
     [SerializeField] private Button EnterDrawB;
     [SerializeField] private Button ChangeDrawB;
-    [SerializeField] private Transform CardTransform;
-    public Transform SpawnPoint;
+    public Transform SpawnPoint; // Spawn point for the weapon
     private List<Vector2> drawnPoints = new List<Vector2>(); // List to store drawn points
     private bool isFreeDrawingMode = true; // Toggle for drawing modes
-    public bool InDrawingState = false;
+    public bool InDrawingState = true; // Initial drawing state
 
     private Rect drawingBounds; // Rectangle bounds for drawing
-    public AnimationController PlayerAnimationController;
-    private Dictionary<WeaponData, GameObject> Cards = new();
+
     private void Start()
     {
         // Define the rectangular bounds in world space
         Vector3 bottomLeft = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.25f, Screen.height * 0.25f, 0));
         Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width * 0.75f, Screen.height * 0.75f, 0));
 
-        // Create the drawing rectangle based on these points
         drawingBounds = new Rect(
             bottomLeft.x,
             bottomLeft.y,
@@ -37,64 +32,59 @@ public class DrawShape : MonoBehaviour
 
         Debug.Log($"Drawing Bounds: {drawingBounds}");
 
+        // Assign button actions
         EnterDrawB.onClick.AddListener(AnalyzeDraw);
         ChangeDrawB.onClick.AddListener(ChangeMode);
 
+        // Subscribe to events to disable/enable drawing when required
+        EventManager.Subscribe("OnWeaponSpawned", DisableDrawing);
+        EventManager.Subscribe("OnWeaponReleased", EnableDrawing);
+    }
 
-        // Reset the remaining count for all loaded weapons
-        WeaponData[] allWeapons = Resources.LoadAll<WeaponData>("Weapon");
-
-
-        foreach (var weapon in allWeapons)
-        {
-            weapon.remainingCount = 4; // Reset dynamically
-            GameObject card = Instantiate(weapon.weaponCard, CardTransform);
-            card.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = weapon.WeaponPrefabName;
-            card.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "4";
-            // weapon.remainingCountTxt.text = "4";
-            Cards[weapon] = card;
-        }
-        Debug.Log($"{allWeapons.Length} weapons initialized dynamically.");
+    private void OnDestroy()
+    {
+        // Unsubscribe from events to avoid memory leaks
+        EventManager.Unsubscribe("OnWeaponSpawned", DisableDrawing);
+        EventManager.Unsubscribe("OnWeaponReleased", EnableDrawing);
     }
 
     private void Update()
     {
-        HandleInput();
+        if (InDrawingState)
+        {
+            HandleInput();
+        }
     }
 
     private void HandleInput()
     {
-        // Clear the drawing when right-clicking
         if (Input.GetMouseButtonDown(1))
         {
-            ClearDrawing();
+            ClearDrawing(); // Clear drawing on right-click
         }
 
-        // Handle drawing in free mode
-        if (isFreeDrawingMode && InDrawingState && Input.GetMouseButton(0))
+        if (isFreeDrawingMode && Input.GetMouseButton(0))
         {
-            AddPointToDrawing();
+            AddPointToDrawing(); // Free drawing
         }
-        // Handle point-to-point drawing
-        else if (!isFreeDrawingMode && InDrawingState && Input.GetMouseButtonDown(0))
+        else if (!isFreeDrawingMode && Input.GetMouseButtonDown(0))
         {
-            AddPointToDrawing();
+            AddPointToDrawing(); // Point-to-point drawing
         }
     }
 
     private void ChangeMode()
     {
         isFreeDrawingMode = !isFreeDrawingMode;
-        Debug.Log(isFreeDrawingMode ? "Free Drawing Mode" : "Point-to-Point Mode");
         ClearDrawing();
+        Debug.Log(isFreeDrawingMode ? "Free Drawing Mode" : "Point-to-Point Mode");
     }
 
     private void AnalyzeDraw()
     {
         if (drawnPoints.Count >= minPointsToMatch)
         {
-            Debug.Log("Processing drawing...");
-            ProcessDrawing();
+            ProcessDrawing(); // Process the shape if enough points are drawn
         }
         else
         {
@@ -106,10 +96,8 @@ public class DrawShape : MonoBehaviour
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        // Check if the mouse position is within the rectangular bounds
         if (drawingBounds.Contains(mousePos))
         {
-            // Add point only if far enough from the last point
             if (drawnPoints.Count == 0 || Vector2.Distance(drawnPoints[^1], mousePos) > 0.1f)
             {
                 drawnPoints.Add(mousePos);
@@ -119,86 +107,52 @@ public class DrawShape : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"Point {mousePos} is outside of bounds {drawingBounds}");
+            //  Debug.LogWarning($"Point {mousePos} is outside of bounds {drawingBounds}");
         }
     }
 
     private void ProcessDrawing()
     {
-        // Center and normalize the drawn points before resampling
         Vector2[] normalizedPoints = ShapeUtils.CenterAndNormalize(drawnPoints.ToArray());
-
-        // Resample points to a fixed count for matching
         Vector2[] resampledPoints = ResamplingUtility.ResamplePoints(normalizedPoints, recognizer.descriptorPointsCount);
 
-        // Match the shape and get the weapon data
         WeaponData matchedWeapon = recognizer.GetWeaponDataFromShape(new List<Vector2>(resampledPoints));
 
         if (matchedWeapon != null)
         {
-            // Shape matched, proceed with weapon instantiation
-            if (matchedWeapon.remainingCount <= 0)
-            {
-                Debug.Log($"{matchedWeapon.WeaponPrefabName} out of ammo");
-                GameManager.Instance.ShowPopUpText("Weapon limit exeeded");
-
-                return;
-            }
-            else
-            {
-                matchedWeapon.remainingCount--;
-                if (Cards.TryGetValue(matchedWeapon, out var card))
-                {
-                    if (card != null)
-                    {
-                        card.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = matchedWeapon.remainingCount.ToString();
-                    }
-                }
-                // matchedWeapon.weaponCard.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = matchedWeapon.remainingCount.ToString();
-                // Debug.Log("haha" + matchedWeapon.weaponCard.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text);
-            }
-
-            ClearDrawing();
             Debug.Log($"Matched Weapon: {matchedWeapon.WeaponPrefabName}");
+            ClearDrawing();
 
-            // Instantiate the weapon prefab
-            if (matchedWeapon.WeaponPrefab != null)
-            {
-                GameObject weaponInstance = Instantiate(matchedWeapon.WeaponPrefab, SpawnPoint.position, Quaternion.identity, SpawnPoint);
-                ProjectileWeapon weapon = weaponInstance.GetComponent<ProjectileWeapon>();
-                weapon.animationController = PlayerAnimationController;
-                weapon.AssignWeaponData(matchedWeapon);
-
-                Debug.Log($"Instantiated Weapon: {matchedWeapon.WeaponPrefabName}");
-                GameManager.Instance.ShowPopUpText($"{matchedWeapon.WeaponPrefabName}");
-                InDrawingState = false; // Disable drawing state
-                StartCoroutine(EnableDrawingStateAfterDelay(1f));
-            }
-            else
-            {
-                Debug.LogWarning($"Weapon prefab for {matchedWeapon.WeaponPrefabName} is missing!");
-            }
+            // Trigger weapon-matched event
+            EventManager.TriggerEvent("OnWeaponMatched", matchedWeapon);
         }
         else
         {
-            // No shape matched, clear the drawing
+            Debug.Log("No weapon matched.");
             ClearDrawing();
-            Debug.Log("No weapon matched. Drawing cleared.");
-            GameManager.Instance.ShowPopUpText("No weapon matched");
         }
     }
 
     private void ClearDrawing()
     {
         drawnPoints.Clear();
-        drawingLineRenderer.positionCount = 0;
-        Debug.Log("Cleared drawn points.");
+        if (drawingLineRenderer != null)
+        {
+            drawingLineRenderer.positionCount = 0;
+        }
+        else
+        {
+            Debug.LogWarning("DrawingLineRenderer is null while attempting to clear drawing.");
+        }
     }
 
-    private IEnumerator EnableDrawingStateAfterDelay(float delay)
+    private void DisableDrawing()
     {
-        yield return new WaitForSeconds(delay);
+        InDrawingState = false;
+    }
+
+    private void EnableDrawing()
+    {
         InDrawingState = true;
-        Debug.Log("Drawing state enabled after delay.");
     }
 }

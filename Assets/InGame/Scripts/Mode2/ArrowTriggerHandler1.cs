@@ -26,27 +26,27 @@ public class ArrowTriggerHandler : MonoBehaviour
             UpdateScoreText();
 
             // Return the obstacle to the pool
-            var obstacleSpawner = FindObjectOfType<ObstacleSpawner>();
+            var obstacleSpawner = FindFirstObjectByType<ObstacleSpawner>();
             if (obstacleSpawner != null)
             {
                 obstacleSpawner.ReturnObstacle(other.gameObject);
             }
         }
         else if (other.CompareTag("Boss")) // Check if collided with the boss
-{
-    // Check if the boss object is not null before disabling it
-    if (other.gameObject != null)
-    {
-        other.gameObject.SetActive(false);
-    }
-    else
-    {
-        Debug.LogWarning("Boss object is already destroyed or missing!");
-    }
+        {
+            // Check if the boss object is not null before disabling it
+            if (other.gameObject != null)
+            {
+                other.gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("Boss object is already destroyed or missing!");
+            }
 
-    // Show the Retry button
-    retryButton.SetActive(true);
-}
+            // Show the Retry button
+            retryButton.SetActive(true);
+        }
     }
 
     private void UpdateScoreText()
