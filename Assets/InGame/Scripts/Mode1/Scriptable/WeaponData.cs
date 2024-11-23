@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Game Data/WeaponData")]
@@ -6,6 +6,7 @@ public class WeaponData : ScriptableObject, IWeaponStats
 {
     [SerializeField] private string weaponPrefabName;
     [SerializeField] private GameObject weaponPrefab; // Weapon prefab reference
+    public   GameObject weaponCard; // Weapon Card prefab reference
     [SerializeField] private int damage;
     [SerializeField] private float range;
     [SerializeField] private float attackSpeed;
@@ -24,6 +25,5 @@ public class WeaponData : ScriptableObject, IWeaponStats
     public float LaunchAngle => launchAngle;
     public WeaponType WeaponType => weaponType; // WeaponType property
 
-
-
+    public int remainingCount;  
 }

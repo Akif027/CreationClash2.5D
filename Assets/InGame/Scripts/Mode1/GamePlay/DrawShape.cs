@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ShapeRecognitionPlugin;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ public class DrawShape : MonoBehaviour
     [SerializeField] private int minPointsToMatch = 10; // Minimum points to consider a valid drawing
     [SerializeField] private Button EnterDrawB;
     [SerializeField] private Button ChangeDrawB;
+    [SerializeField] private Transform CardTransform;
     public Transform SpawnPoint;
     private List<Vector2> drawnPoints = new List<Vector2>(); // List to store drawn points
     private bool isFreeDrawingMode = true; // Toggle for drawing modes
@@ -18,6 +20,7 @@ public class DrawShape : MonoBehaviour
 
     private Rect drawingBounds; // Rectangle bounds for drawing
     public AnimationController PlayerAnimationController;
+    private Dictionary<WeaponData, GameObject> Cards = new();
     private void Start()
     {
         // Define the rectangular bounds in world space
@@ -36,6 +39,22 @@ public class DrawShape : MonoBehaviour
 
         EnterDrawB.onClick.AddListener(AnalyzeDraw);
         ChangeDrawB.onClick.AddListener(ChangeMode);
+
+
+        // Reset the remaining count for all loaded weapons
+        WeaponData[] allWeapons = Resources.LoadAll<WeaponData>("Weapon");
+
+
+        foreach (var weapon in allWeapons)
+        {
+            weapon.remainingCount = 4; // Reset dynamically
+            GameObject card = Instantiate(weapon.weaponCard, CardTransform);
+            card.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = weapon.WeaponPrefabName;
+            card.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "4";
+            // weapon.remainingCountTxt.text = "4";
+            Cards[weapon] = card;
+        }
+        Debug.Log($"{allWeapons.Length} weapons initialized dynamically.");
     }
 
     private void Update()
@@ -118,6 +137,27 @@ public class DrawShape : MonoBehaviour
         if (matchedWeapon != null)
         {
             // Shape matched, proceed with weapon instantiation
+            if (matchedWeapon.remainingCount <= 0)
+            {
+                Debug.Log($"{matchedWeapon.WeaponPrefabName} out of ammo");
+                GameManager.Instance.ShowPopUpText("Weapon limit exeeded");
+
+                return;
+            }
+            else
+            {
+                matchedWeapon.remainingCount--;
+                if (Cards.TryGetValue(matchedWeapon, out var card))
+                {
+                    if (card != null)
+                    {
+                        card.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = matchedWeapon.remainingCount.ToString();
+                    }
+                }
+                // matchedWeapon.weaponCard.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = matchedWeapon.remainingCount.ToString();
+                // Debug.Log("haha" + matchedWeapon.weaponCard.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text);
+            }
+
             ClearDrawing();
             Debug.Log($"Matched Weapon: {matchedWeapon.WeaponPrefabName}");
 
