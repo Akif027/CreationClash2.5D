@@ -47,13 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd403db140864ec42bb2b798a026db4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxDragDistance: 5
+  isLaunched: 0
   trajectoryDotPoolName: DotMaker
   dotCount: 15
-  isLaunched: 0
-  isEnemyWeapon: 0
-  col: {fileID: 6540123668219537956}
-  dynamicLaunchAngle: 0
-  animationController: {fileID: 0}
 --- !u!54 &4373206721725927885
 Rigidbody:
   m_ObjectHideFlags: 0

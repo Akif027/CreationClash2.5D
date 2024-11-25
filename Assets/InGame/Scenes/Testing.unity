@@ -154,7 +154,6 @@ MonoBehaviour:
   minPointsToMatch: 3
   EnterDrawB: {fileID: 508849387}
   ChangeDrawB: {fileID: 380746459}
-  CardTransform: {fileID: 268470646}
   SpawnPoint: {fileID: 1325624962}
   InDrawingState: 1
 --- !u!4 &50430235

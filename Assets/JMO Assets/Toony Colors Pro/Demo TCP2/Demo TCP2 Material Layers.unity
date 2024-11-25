@@ -514,10 +514,10 @@ MonoBehaviour:
 
     - Ramp Smoothing (softer on the snow)
 
-    - Normal Map (Perlin
-    noise)
+    - Normal Map (Perlin noise)
 
-    - Normal Map Scale (to adjust normal scale per-texture)'
+    -
+    Normal Map Scale (to adjust normal scale per-texture)'
 --- !u!1 &240067738
 GameObject:
   m_ObjectHideFlags: 0
@@ -3229,8 +3229,8 @@ MonoBehaviour:
   textBox: {fileID: 2097451634}
   Text: '<b>Y Normal-based Snow Layer:</b>
 
-    All texels pointing up (Y) will
-    become snow.
+    All texels pointing up (Y) will become
+    snow.
 
     The noise texture and the contrast value help to
 
