@@ -2,11 +2,7 @@ using UnityEngine;
 
 public class EnemyWeaponManager : WeaponManager
 {
-    [Header("Enemy-Specific Settings")]
-    [SerializeField] private float minLaunchForce = 10f;
-    [SerializeField] private float maxLaunchForce = 20f;
-    [SerializeField] private Vector2 targetRangeX = new Vector2(-10f, -20f);
-    [SerializeField] private Vector2 targetRangeY = new Vector2(0f, 5f);
+
     [SerializeField] private Transform weaponSpawnPoint;
     public override void InitializeWeapons()
     {

@@ -822,6 +822,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &172295518 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6707694328723918249, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
+  m_PrefabInstance: {fileID: 1469741672}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &179658779 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: fd282ab2a221afc4e817545bcad6c781, type: 3}
@@ -3284,7 +3289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d7621c151478004e807a557f4e7cec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handpos: {fileID: 1315356286}
+  handpos: {fileID: 1214334743}
   weaponSpawnPoint: {fileID: 1325624962}
   trajectoryDotPoolName: DotMaker
   dotCount: 30
@@ -4017,6 +4022,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5760cbc1e13c19c48a8ebc466d80d465, type: 3}
+--- !u!4 &1214334743 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6707694328723918259, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
+  m_PrefabInstance: {fileID: 1555683413033660314}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1228719711
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4313,11 +4323,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3fc53413bbf70541b2393225fc54970, type: 3}
---- !u!4 &1315356286 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6707694328723918249, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
-  m_PrefabInstance: {fileID: 1555683413033660314}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1325624961
 GameObject:
   m_ObjectHideFlags: 0
@@ -4952,7 +4957,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6707694328723689963, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6707694328723918219, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5068,7 +5073,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 59ce4d68ba47fb1459df21ff4fcc4d53, type: 2}
     - target: {fileID: 6707694328731083335, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7195,8 +7200,8 @@ MonoBehaviour:
   enemyWeaponManager: {fileID: 1944806513}
   minRange: {x: -5, y: 0}
   maxRange: {x: -7, y: 3}
-  minSpawnInterval: 5
-  maxSpawnInterval: 10
+  minSpawnInterval: 10
+  maxSpawnInterval: 15
   animationController: {fileID: 1944806504}
 --- !u!4 &1944806512 stripped
 Transform:
@@ -7215,11 +7220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1028c4a8d46ddee42a22c5992840ef7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handpos: {fileID: 0}
-  minLaunchForce: 10
-  maxLaunchForce: 20
-  targetRangeX: {x: -10, y: -20}
-  targetRangeY: {x: 0, y: 5}
+  handpos: {fileID: 172295518}
   weaponSpawnPoint: {fileID: 1447767717}
 --- !u!4 &1964303985 stripped
 Transform:
@@ -7553,7 +7554,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6707694328723918219, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.929
+      value: -2.98
       objectReference: {fileID: 0}
     - target: {fileID: 6707694328723918219, guid: ea1589e159a5f964581b37c56ff8f565, type: 3}
       propertyPath: m_LocalRotation.w

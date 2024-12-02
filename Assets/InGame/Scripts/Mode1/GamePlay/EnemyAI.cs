@@ -53,17 +53,14 @@ public class EnemyAI : MonoBehaviour
         // Calculate a random target position
         targetPosition = GetRandomTargetPosition();
 
-        // Play the throw animation (launch triggered via animation event)
-        if (animationController != null)
-        {
-            animationController.PlayAnimation(AnimationType.Throw);
-        }
-        else
-        {
-            Debug.LogError("AnimationController is not assigned to EnemyAI!");
-        }
+        // Add delay before playing throw animation
+        StartCoroutine(DelayedThrowAnimation());
     }
-
+    private IEnumerator DelayedThrowAnimation()
+    {
+        yield return new WaitForSeconds(2f);
+        animationController.PlayAnimation(AnimationType.Throw);
+    }
     private Vector3 GetRandomTargetPosition()
     {
         return new Vector3(

@@ -9,7 +9,7 @@ public static class EventManager
     private static Dictionary<string, Action<object>> eventDictionaryWithParams = new Dictionary<string, Action<object>>();
 
     /// <summary>
-    /// Subscribe to an event with no parameters.
+    /// Subscribe to an event with no parameters. also avoiding duplication subscription
     /// </summary>
     public static void Subscribe(string eventName, Action listener)
     {
