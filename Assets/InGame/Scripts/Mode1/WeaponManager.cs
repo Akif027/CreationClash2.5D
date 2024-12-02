@@ -1,139 +1,79 @@
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
 
-public class WeaponManager : MonoBehaviour
+public abstract class WeaponManager : MonoBehaviour
 {
-    [SerializeField] private Transform cardParent; // Parent transform for weapon cards
-    [SerializeField] private Transform weaponSpawnPoint; // Spawn point for weapons
+    protected List<WeaponData> availableWeapons = new List<WeaponData>();
+    protected GameObject currentWeaponInstance;
+    protected Rigidbody currentWeaponRigidbody;
+    protected WeaponData currentWeaponData;
 
-    private Dictionary<WeaponData, WeaponRuntimeData> weaponRuntimeData = new Dictionary<WeaponData, WeaponRuntimeData>();
-    private Dictionary<WeaponData, GameObject> weaponCards = new Dictionary<WeaponData, GameObject>();
+    public Transform handpos;
 
-    private void Start()
+    public virtual void Awake()
     {
-        InitializeWeapons();
+        // Subscribe to the event to handle weapon matching
         EventManager.Subscribe("OnWeaponMatched", HandleWeaponMatched);
     }
 
-    private void OnDestroy()
+    public virtual void OnDestroy()
     {
+        // Unsubscribe to prevent memory leaks
         EventManager.Unsubscribe("OnWeaponMatched", HandleWeaponMatched);
-        foreach (var card in weaponCards.Values)
-        {
-            Destroy(card);
-        }
     }
 
-    private void InitializeWeapons()
+    public abstract void InitializeWeapons();
+
+    public abstract void SpawnRandomWeapon();
+
+    public virtual void SpawnWeapon(WeaponData weaponData)
     {
-        GameView gameView = (GameView)GameManager.Instance.GetManager<GameView>();
-        if (gameView == null)
+        if (weaponData == null || weaponData.WeaponPrefab == null)
         {
-            Debug.LogError("GameView is not found in GameManager.");
+            Debug.LogWarning("Invalid WeaponData or missing WeaponPrefab!");
             return;
         }
 
-        List<WeaponData> allWeapons = gameView.GetGameData()?.WeaponDatas;
-        if (allWeapons == null)
+        currentWeaponInstance = Instantiate(weaponData.WeaponPrefab, GetWeaponSpawnPosition(), Quaternion.identity);
+        currentWeaponRigidbody = currentWeaponInstance.GetComponent<Rigidbody>();
+        currentWeaponInstance.transform.SetParent(handpos);
+        currentWeaponInstance.transform.position = handpos.position;
+
+        if (currentWeaponRigidbody != null)
         {
-            Debug.LogError("Weapon data not found in GameData.");
-            return;
+            currentWeaponRigidbody.isKinematic = true; // Disable physics until launched
         }
 
-        foreach (var weapon in allWeapons)
-        {
-            var runtimeData = new WeaponRuntimeData
-            {
-                WeaponData = weapon,
-                RemainingCount = 4
-            };
-
-            weaponRuntimeData[weapon] = runtimeData;
-
-            if (weapon.weaponCard != null && cardParent != null)
-            {
-                GameObject card = Instantiate(weapon.weaponCard, cardParent);
-                weaponCards[weapon] = card;
-                UpdateWeaponCardUI(card, runtimeData);
-            }
-        }
+        currentWeaponData = weaponData;
     }
 
-
-    private void HandleWeaponMatched(object weaponObj)
+    public virtual Vector3 GetWeaponSpawnPosition()
     {
-        if (weaponObj is WeaponData matchedWeapon && weaponRuntimeData.ContainsKey(matchedWeapon))
-        {
-            var runtimeData = weaponRuntimeData[matchedWeapon];
-
-            if (runtimeData.RemainingCount > 0)
-            {
-                runtimeData.RemainingCount--; // Modify runtime state
-                Debug.Log($"Weapon used: {matchedWeapon.WeaponPrefabName}. Remaining: {runtimeData.RemainingCount}");
-
-                // Check weapon prefab and spawn point
-                if (matchedWeapon.WeaponPrefab == null)
-                {
-                    Debug.LogError($"Weapon prefab is null for {matchedWeapon.WeaponPrefabName}");
-                    return;
-                }
-
-                if (weaponSpawnPoint == null)
-                {
-                    Debug.LogError("Weapon spawn point is not assigned in WeaponManager.");
-                    return;
-                }
-
-                // Instantiate the weapon at the spawn point
-                GameObject weaponInstance = Instantiate(matchedWeapon.WeaponPrefab, weaponSpawnPoint.position, Quaternion.identity);
-                Debug.Log($"Instantiated Weapon: {matchedWeapon.WeaponPrefabName} at {weaponSpawnPoint.position}");
-
-                // Call AssignWeaponData on the instantiated weapon
-                ProjectileWeapon projectileWeapon = weaponInstance.GetComponent<ProjectileWeapon>();
-                if (projectileWeapon != null)
-                {
-                    projectileWeapon.AssignWeaponData(matchedWeapon);
-                }
-                else
-                {
-                    Debug.LogError($"ProjectileWeapon component is missing on {matchedWeapon.WeaponPrefabName}");
-                }
-
-                // Update the card UI if applicable
-                if (weaponCards.ContainsKey(matchedWeapon))
-                {
-                    UpdateWeaponCardUI(weaponCards[matchedWeapon], runtimeData);
-                }
-            }
-            else
-            {
-                Debug.Log($"Out of {matchedWeapon.WeaponPrefabName}");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Weapon match event received, but weapon data is invalid or not initialized.");
-        }
+        return transform.position;
     }
 
-    private void UpdateWeaponCardUI(GameObject card, WeaponRuntimeData runtimeData)
+    public void LaunchWithForce(Vector3 force)
     {
-        if (card != null)
+        if (currentWeaponInstance != null && currentWeaponRigidbody != null)
         {
-            card.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = runtimeData.WeaponData.WeaponPrefabName;
-            card.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = runtimeData.RemainingCount.ToString();
+            ProjectileWeapon projectileWeapon = currentWeaponInstance.GetComponent<ProjectileWeapon>();
+            projectileWeapon.Damage = currentWeaponData.Damage;
+            currentWeaponInstance.transform.SetParent(null); // Detach from any parent (like a hand)
+            currentWeaponRigidbody.isKinematic = false; // Enable physics
+            currentWeaponRigidbody.AddForce(force, ForceMode.VelocityChange); // Apply the given force
+            currentWeaponInstance = null; // Reset after launch
+            projectileWeapon.EnableCollider();
+
         }
     }
 
-
-}
-
-/// <summary>
-/// Runtime data for a weapon, used to track state that shouldn't modify the original asset.
-/// </summary>
-public class WeaponRuntimeData
-{
-    public WeaponData WeaponData { get; set; }
-    public int RemainingCount { get; set; }
+    // Handle the weapon matched event
+    protected virtual void HandleWeaponMatched(object weaponObj)
+    {
+        if (weaponObj is WeaponData weaponData)
+        {
+            Debug.Log($"Weapon matched: {weaponData.WeaponPrefabName}");
+            SpawnWeapon(weaponData); // Spawn the weapon at the spawn position
+        }
+    }
 }

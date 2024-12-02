@@ -21,4 +21,4 @@ MonoBehaviour:
   launchForce: 20
   launchAngle: 30
   weaponType: 1
-  remainingCount: 0
+  remainingCount: 4

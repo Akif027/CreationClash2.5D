@@ -31,6 +31,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 586487048956511863}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6114435032095262929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5014736063182008768}
+  - component: {fileID: 2662541039138900200}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5014736063182008768
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6114435032095262929}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 586487048956511863}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2662541039138900200
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6114435032095262929}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.01, y: 0.01, z: 0.01}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6221370530267042993
 GameObject:
   m_ObjectHideFlags: 0
@@ -42,7 +95,6 @@ GameObject:
   - component: {fileID: 586487048956511863}
   - component: {fileID: 8728768057833279684}
   - component: {fileID: 2390415048761808830}
-  - component: {fileID: 6557424938082218315}
   - component: {fileID: 277895000467802949}
   - component: {fileID: 6523627569564537321}
   m_Layer: 0
@@ -66,6 +118,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3117298284579126621}
+  - {fileID: 5014736063182008768}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -93.657, y: 72.648, z: -72.92401}
 --- !u!33 &8728768057833279684
@@ -121,27 +174,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6557424938082218315
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6221370530267042993}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Size: {x: 0.012890214, y: 0.014664811, z: 0.008293456}
-  m_Center: {x: 0.0002213202, y: 0.00007264619, z: 0.00021050221}
 --- !u!114 &277895000467802949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,10 +186,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd403db140864ec42bb2b798a026db4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxDragDistance: 5
-  isLaunched: 0
-  trajectoryDotPoolName: DotMaker
-  dotCount: 15
 --- !u!54 &6523627569564537321
 Rigidbody:
   m_ObjectHideFlags: 0

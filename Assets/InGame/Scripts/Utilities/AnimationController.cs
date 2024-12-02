@@ -6,21 +6,11 @@ public class AnimationController : MonoBehaviour
     [SerializeField] AnimationType CurrentAnimation;
     [SerializeField] private Animator animator; // The Animator component
     [SerializeField] private bool resetTriggersBeforePlay = true; // Whether to reset all triggers before playing
-    // Singleton instance
-    public static AnimationController Instance { get; private set; }
+                                                                  // Singleton instance
 
 
 
-    private void Awake()
-    {
-        // Check if an instance already exists
-        if (Instance == null)
-        {
-            Instance = this;
-            //  DontDestroyOnLoad(gameObject); // Ensure the singleton persists across scenes
-        }
 
-    }
     /// <summary>
     /// Plays an animation by AnimationType.
     /// </summary>
@@ -34,4 +24,22 @@ public class AnimationController : MonoBehaviour
         CurrentAnimation = animationType;
         BaseAnimationManager.PlayAnimation(animator, animationType);
     }
+    // public void Release()
+    // {
+    //     projectileWeapon = WeaponManager.Instance.GetCurretWeapon();
+    //     if (projectileWeapon != null)
+    //     {
+    //         projectileWeapon.transform.SetParent(null);
+
+    //         projectileWeapon.LaunchWithDelay();
+    //     }
+    //     else
+    //     {
+
+    //         Debug.LogError("No Weapon");
+    //     }
+
+    // }
+
+
 }

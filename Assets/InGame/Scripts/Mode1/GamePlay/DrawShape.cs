@@ -120,6 +120,7 @@ public class DrawShape : MonoBehaviour
 
         if (matchedWeapon != null)
         {
+
             Debug.Log($"Matched Weapon: {matchedWeapon.WeaponPrefabName}");
             ClearDrawing();
 
