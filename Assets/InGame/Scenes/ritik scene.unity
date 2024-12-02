@@ -340,7 +340,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 173342213}
-  - component: {fileID: 173342212}
+  - component: {fileID: 173342214}
   m_Layer: 0
   m_Name: Objectpool
   m_TagString: Untagged
@@ -348,34 +348,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &173342212
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 173342211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ddeae024014c78428a10d29101dea51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pooledObjects:
-  - name: Obstacle1
-    prefab: {fileID: 7886366445386389167, guid: fd5a9cdd04ecb6a459a4674e1e7ee3c6, type: 3}
-    parent: {fileID: 0}
-    initialSize: 10
-    maxSize: 50
-  - name: boss
-    prefab: {fileID: 41357388779140913, guid: 2cde9d4f74af1f7459b50e467f30173a, type: 3}
-    parent: {fileID: 0}
-    initialSize: 2
-    maxSize: 5
-  - name: Obstacle2
-    prefab: {fileID: 156539629389514007, guid: 15dec81be674e8445869760241dea5d4, type: 3}
-    parent: {fileID: 0}
-    initialSize: 2
-    maxSize: 5
 --- !u!4 &173342213
 Transform:
   m_ObjectHideFlags: 0
@@ -391,6 +363,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &173342214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173342211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a410d8ef8285814b8dedbc801b07e50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pooledObjects:
+  - name: Obstacle1
+    prefab: {fileID: 7886366445386389167, guid: fd5a9cdd04ecb6a459a4674e1e7ee3c6, type: 3}
+    parent: {fileID: 0}
+    initialSize: 20
+    maxSize: 30
+  - name: boss
+    prefab: {fileID: 41357388779140913, guid: 2cde9d4f74af1f7459b50e467f30173a, type: 3}
+    parent: {fileID: 0}
+    initialSize: 5
+    maxSize: 10
 --- !u!1 &180671975
 GameObject:
   m_ObjectHideFlags: 0
