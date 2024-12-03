@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class EnemyWeaponManager : WeaponManager
 {
+    [SerializeField] private Transform weaponSpawnPoint; // Where the weapon appears initially
 
-    [SerializeField] private Transform weaponSpawnPoint;
     public override void InitializeWeapons()
     {
         GameView gameView = (GameView)GameManager.Instance.GetManager<GameView>();
@@ -27,21 +27,25 @@ public class EnemyWeaponManager : WeaponManager
         WeaponData randomWeapon = availableWeapons[Random.Range(0, availableWeapons.Count)];
         SpawnWeapon(randomWeapon);
     }
+
     public override Vector3 GetWeaponSpawnPosition()
     {
-        if (weaponSpawnPoint != null)
-        {
-            return weaponSpawnPoint.position;
-        }
-        return base.GetWeaponSpawnPosition(); // Fallback to default if not set
+        // Ensure weapon spawns at the spawn point
+        return weaponSpawnPoint != null ? weaponSpawnPoint.position : base.GetWeaponSpawnPosition();
     }
+
     public void LaunchTowardTarget(Vector3 targetPosition)
     {
-        if (currentWeaponInstance == null || currentWeaponRigidbody == null) return;
+        if (currentWeaponInstance == null || currentWeaponRigidbody == null)
+        {
+            Debug.LogWarning("No weapon to launch!");
+            return;
+        }
 
-        Vector3 startPosition = GetWeaponSpawnPosition();
-        Vector3 launchVector = CalculateLaunchVector(startPosition, targetPosition);
+        // Calculate the launch vector
+        Vector3 launchVector = CalculateLaunchVector(GetWeaponSpawnPosition(), targetPosition);
 
+        // Launch the weapon
         LaunchWithForce(launchVector);
     }
 
@@ -51,7 +55,6 @@ public class EnemyWeaponManager : WeaponManager
         float distanceX = targetPosition.x - startPosition.x;
         float distanceY = targetPosition.y - startPosition.y;
 
-        // Calculate required velocity
         float velocitySquared = gravity * Mathf.Pow(distanceX, 2) / (2 * Mathf.Abs(distanceY));
         if (velocitySquared <= 0)
         {
@@ -60,6 +63,6 @@ public class EnemyWeaponManager : WeaponManager
         }
 
         float velocity = Mathf.Sqrt(velocitySquared);
-        return new Vector3(-velocity, velocity, 0).normalized * velocity;
+        return new Vector3(distanceX, velocity, 0).normalized * velocity;
     }
 }

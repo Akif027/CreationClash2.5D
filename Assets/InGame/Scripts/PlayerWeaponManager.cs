@@ -26,7 +26,7 @@ public class PlayerWeaponManager : WeaponManager
 
     public override void InitializeWeapons()
     {
-        // Load and prepare weapons available to the player
+
     }
 
     public override void SpawnRandomWeapon()

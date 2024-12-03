@@ -33,7 +33,8 @@ public class HealthManager : MonoBehaviour
 
     private void HandleDeath()
     {
-        Debug.Log("Player is dead!");
+
+
         UIManager.Instance.ToggleGameOverPanel(true);
         animationController.PlayAnimation(AnimationType.Dead);
         Destroy(gameObject, 2);

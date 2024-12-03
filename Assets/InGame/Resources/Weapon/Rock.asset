@@ -16,9 +16,9 @@ MonoBehaviour:
   weaponPrefab: {fileID: 6221370530267042993, guid: cc51fb8636829044e913e1e2fcc32b05, type: 3}
   weaponCard: {fileID: 533189193184510604, guid: 2699f86625b9d7b4c80307992cf4bc42, type: 3}
   damage: 10
-  range: 5
+  range: 1
   attackSpeed: 0
-  launchForce: 20
+  launchForce: 10
   launchAngle: 4
   weaponType: 0
   remainingCount: 1000

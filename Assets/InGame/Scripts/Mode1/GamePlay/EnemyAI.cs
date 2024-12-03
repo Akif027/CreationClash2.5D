@@ -39,6 +39,7 @@ public class EnemyAI : MonoBehaviour
             float spawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
             yield return new WaitForSeconds(spawnInterval);
 
+            // Spawn a weapon
             SpawnWeapon();
         }
     }
@@ -53,16 +54,19 @@ public class EnemyAI : MonoBehaviour
         // Calculate a random target position
         targetPosition = GetRandomTargetPosition();
 
-        // Add delay before playing throw animation
+        // Trigger throw animation with a delay
         StartCoroutine(DelayedThrowAnimation());
     }
+
     private IEnumerator DelayedThrowAnimation()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f); // Slight delay before throwing
         animationController.PlayAnimation(AnimationType.Throw);
     }
+
     private Vector3 GetRandomTargetPosition()
     {
+        // Calculate a random position within the range
         return new Vector3(
             Random.Range(minRange.x, maxRange.x),
             Random.Range(minRange.y, maxRange.y),
@@ -74,12 +78,8 @@ public class EnemyAI : MonoBehaviour
     {
         if (enemyWeaponManager == null) return;
 
-        Vector3 launchVector = enemyWeaponManager.CalculateLaunchVector(
-            enemyWeaponManager.GetWeaponSpawnPosition(),
-            targetPosition
-        );
-
-        enemyWeaponManager.LaunchWithForce(launchVector);
+        // Launch weapon toward the target position
+        enemyWeaponManager.LaunchTowardTarget(targetPosition);
     }
 
     private void OnDisable()
